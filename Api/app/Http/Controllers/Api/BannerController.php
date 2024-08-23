@@ -36,4 +36,8 @@ class BannerController extends Controller
     {
         return $this->bannerService->destroy($id);
     }
+    public function downLoadImage(string $id)
+    {
+        return $this->bannerService->downLoadImage($id);
+    }
 }

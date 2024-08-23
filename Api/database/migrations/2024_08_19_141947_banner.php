@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('banners', function (Blueprint $table) {
             $table->ulid('idBanner')->primary();
             $table->string('nameMidia');
-            $table->string('veiculo')->default('Outro');
-            $table->string('dimensao')->default('Indeterminado');
+            $table->string('veiculo')->default('Outro')->nullable(true);
+            $table->string('dimensao')->default('Indeterminado')->nullable(true);
             $table->string('tamanho');
-            $table->string('looping')->default('Indeterminado');
-            $table->string('tempo')->default('Indeterminado');
+            $table->string('looping')->default('Indeterminado')->nullable(true);
+            $table->string('tempo')->default('Indeterminado')->nullable(true);
             $table->string('complexidade');
-            $table->string('tipo')->default('Desenvolvimento');
-            $table->string('status')->default('Aguardando Aprovação');
+            $table->string('tipo')->default('Desenvolvimento')->nullable(true);
+            $table->string('statusBanner')->default('Aguardando Aprovação')->nullable(true);
             // $table->index('idUser');
             // $table->foreignUlid('idUser')->references('idUser')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
