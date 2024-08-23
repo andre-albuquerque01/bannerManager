@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Events\UserRecoverPassword;
 use App\Exceptions\GeneralExceptionCatch;
 use App\Exceptions\UserException;
 use App\Http\Resources\GeneralResource;
@@ -114,8 +115,9 @@ class UserService
                     'created_at' => now(),
                 ]);
             }
-            dispatch(new SendRecoverPasswordEmailJob($user->email, $token));
-            
+            // dispatch(new SendRecoverPasswordEmailJob($user->email, $token));
+            event(new UserRecoverPassword($user->email, $token));
+
             return new GeneralResource(['message' => 'send e-mail']);
         } catch (\Exception $e) {
             throw new GeneralExceptionCatch('Error, send email recover password');
