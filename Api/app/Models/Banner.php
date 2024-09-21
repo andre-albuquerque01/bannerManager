@@ -13,13 +13,13 @@ class Banner extends Model
     protected $table = 'banners';
     protected $primaryKey = 'idBanner';
     protected $fillable = [
-        'nameMidia',
+        'title',
+        'urlMidia',
         'veiculo',
         'dimensao',
         'tamanho',
-        'looping',
         'tempo',
-        'complexidade',
+        'extensionMidia',
         'tipo',
         'statusBanner',
     ];
