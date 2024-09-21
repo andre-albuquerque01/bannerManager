@@ -22,9 +22,9 @@ class BannerRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            "nameMidia" => [
+            "title" => [
                 "required",
-                // "max:2048",
+                "max:100",
             ],
             "veiculo" => [
                 "nullable",
@@ -34,23 +34,27 @@ class BannerRequest extends FormRequest
             "dimensao" => [
                 "nullable",
             ],
-            "looping" => [
-                "nullable",
-                "min:1",
-                "max:40",
-            ],
             "tempo" => [
                 "nullable",
             ],
-            "complexidade" => [
-                "nullable",
+            "extensionMidia" => [
+                "required",
                 "min:1",
-                "max:40",
+                "max:80",
+            ],
+            "tamanho" => [
+                "required",
+                "min:1",
+                "max:80",
             ],
             "tipo" => [
                 "nullable",
                 "min:1",
                 "max:40",
+            ],
+            "urlMidia" => [
+                "required",
+                "min:1",
             ],
             "statusBanner" => [
                 "nullable",
@@ -62,7 +66,18 @@ class BannerRequest extends FormRequest
         if ($this->method() == 'PUT') {
             $rules["nameMidia"] = [
                 "nullable",
-                "max:2048",
+                "max:100",
+            ];
+            $rules["urlMidia"] = [
+                "nullable",
+            ];
+            $rules["extensionMidia"] = [
+                "nullable",
+                "max:80",
+            ];
+            $rules["tamanho"] = [
+                "nullable",
+                "max:80",
             ];
         }
 
