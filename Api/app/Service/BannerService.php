@@ -69,7 +69,7 @@ class BannerService
         }
     }
 
-    public function downLoadImage(string $id)
+    public function downloadImage(string $id)
     {
         try {
             $banner = Banner::where('idBanner', $id)->first();
