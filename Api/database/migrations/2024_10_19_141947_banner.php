@@ -13,17 +13,18 @@ return new class extends Migration
     {
         Schema::create('banners', function (Blueprint $table) {
             $table->ulid('idBanner')->primary();
-            $table->string('nameMidia');
+            $table->string('title');
+            $table->string('urlMidia');
             $table->string('veiculo')->default('Outro')->nullable(true);
             $table->string('dimensao')->default('Indeterminado')->nullable(true);
+            $table->string('extensionMidia');
             $table->string('tamanho');
-            $table->string('looping')->default('Indeterminado')->nullable(true);
             $table->string('tempo')->default('Indeterminado')->nullable(true);
-            $table->string('complexidade');
             $table->string('tipo')->default('Desenvolvimento')->nullable(true);
             $table->string('statusBanner')->default('Aguardando Aprovação')->nullable(true);
-            // $table->index('idUser');
-            // $table->foreignUlid('idUser')->references('idUser')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            // Para vincular cada Banner ao uma campanha ou empresa (Business)
+            // $table->index('idBusiness');
+            // $table->foreignUlid('idBusiness')->references('idBusiness')->on('business')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('banners');
     }
 };
