@@ -28,7 +28,7 @@ class UserService
     {
         try {
             if (!Auth::attempt($data)) {
-                throw new UserException('Login invalid', 403);
+                return response()->json(['message' => 'Email ou senha incorreta.']);
             }
             $token = $this->request->user()->createToken('')->plainTextToken;
             return new GeneralResource(['token' => $token]);
@@ -99,8 +99,8 @@ class UserService
     {
         try {
             $user = User::where('email', $email)->first();
-            if (!$user) throw new UserException('user not found');
-
+            if (!$user)
+                return new GeneralResource(['message' => 'user not found']);
             $token = strtoupper(Str::random(60));
             $table = DB::table('password_reset_tokens')->where('email', $email)->first();
             if (!$table) {
@@ -115,7 +115,7 @@ class UserService
                     'created_at' => now(),
                 ]);
             }
-            // dispatch(new SendRecoverPasswordEmailJob($user->email, $token));
+            // dispatch(new SendRecoverPasswordEmailJob($user->email, $token)); // Para colocar o envio do e-mail em segundo plano
             event(new UserRecoverPassword($user->email, $token));
 
             return new GeneralResource(['message' => 'send e-mail']);
