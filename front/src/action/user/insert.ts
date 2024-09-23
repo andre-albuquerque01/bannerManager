@@ -1,8 +1,8 @@
 'use server'
 
 import ApiRoute from '@/data/apiRoute'
-import apiError from '@/data/function/apiErro'
 import VerificationPassword from '@/data/function/validatePassword'
+import { ApiErrorResponse } from '@/data/type/apiErrorResponse'
 import { revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -26,7 +26,7 @@ export async function InsertUser(
     }
     VerificationPassword(password)
 
-    const response = await ApiRoute('/user', {
+    const response = await ApiRoute('/userStore', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -34,42 +34,61 @@ export async function InsertUser(
       body: request,
     })
 
-    const data = await response.json()
-    const message =
-      data && data.data && typeof data.data.message === 'string'
-        ? data.data.message
-        : JSON.stringify(data?.data?.message || '')
+    const data: ApiErrorResponse = await response.json()
 
-    if (message && message.includes('The email has already been taken.'))
-      throw new Error('E-mail já cadastrado!')
-    if (
-      message &&
-      message.includes('The password field must be at least 8 characters.')
-    )
-      throw new Error('A senha deve ter ao menos 8 caracters')
-    if (
-      message &&
-      message.includes('The password field must contain at least one symbol.')
-    )
-      throw new Error('A senha precisa de um caracter especial')
-    if (
-      message &&
-      message.includes(
-        'The password field must contain at least one uppercase and one lowercase letter.',
-      )
-    )
-      throw new Error(
-        'Senha precisa de ao menos uma letra maisucla e uma minisucla',
-      )
-    if (
-      message &&
-      message.includes(
-        'The given password has appeared in a data leak. Please choose a different password.',
-      )
-    )
-      throw new Error('Senha fraca.')
+    if (data.errors) {
+      const errors = data.errors
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for (const [field, messages] of Object.entries(errors)) {
+        messages.forEach((message) => {
+          if (message === 'The email has already been taken.') {
+            throw new Error('E-mail já cadastrado!')
+          } else if (message === 'The email field is required.') {
+            throw new Error('O campo email é obrigatório.')
+          } else if (message === 'The name field is required.') {
+            throw new Error('O campo nome é obrigatório.')
+          } else if (message === 'The password field is required.') {
+            throw new Error('O campo senha é obrigatório.')
+          } else if (
+            message === 'The password confirmation field is required.'
+          ) {
+            throw new Error('O campo repita senha é obrigatório.')
+          } else if (
+            message === 'The password field must be at least 8 characters.'
+          ) {
+            throw new Error('A senha deve ter ao menos 8 caracteres.')
+          } else if (
+            message === 'The password field must contain at least one symbol.'
+          ) {
+            throw new Error('A senha precisa de um caracter especial.')
+          } else if (
+            message ===
+            'The password field must contain at least one uppercase and one lowercase letter.'
+          ) {
+            throw new Error(
+              'Senha precisa de ao menos uma letra maiúscula e uma minúsculas.',
+            )
+          } else if (
+            message ===
+            'The given password has appeared in a data leak. Please choose a different password.'
+          ) {
+            throw new Error('Senha fraca.')
+          }
+        })
+      }
+    }
   } catch (error) {
-    return apiError(error)
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Desculpe, ocorreu um erro ao cadastrar.\n Por favor, tente novamente mais tarde.'
+
+    return {
+      data: null,
+      error: errorMessage,
+      ok: false,
+    }
   }
   revalidateTag('user')
   redirect('/user/login')
