@@ -14,7 +14,7 @@ export async function ShowUser() {
         Authorization: `Bearer ${cookies().get('token')?.value}`,
       },
       next: {
-        revalidate: 60 * 24,
+        revalidate: 60 * 60 * 24,
         tags: ['user'],
       },
     })
