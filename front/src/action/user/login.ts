@@ -1,7 +1,6 @@
 'use server'
 
 import ApiRoute from '@/data/apiRoute'
-import apiError from '@/data/function/apiErro'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
@@ -25,7 +24,16 @@ export async function LoginUser(
     const data = await response.json()
 
     if (!response.ok) {
-      return { data: null, error: 'Error', ok: false }
+      return {
+        data: null,
+        error:
+          'Desculpe, ocorreu um erro ao cadastrar.\n Por favor, tente novamente mais tarde.',
+        ok: false,
+      }
+    }
+
+    if (data.message === 'Email ou senha incorreta.') {
+      return { data: null, error: 'Email ou senha incorreta.', ok: false }
     }
 
     cookiesStore.set('token', data.data.token, {
@@ -35,7 +43,16 @@ export async function LoginUser(
       sameSite: 'strict',
     })
   } catch (error) {
-    return apiError(error)
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Desculpe, ocorreu um erro ao cadastrar.\n Por favor, tente novamente mais tarde.'
+
+    return {
+      data: null,
+      error: errorMessage,
+      ok: false,
+    }
   }
 
   redirect('/')
