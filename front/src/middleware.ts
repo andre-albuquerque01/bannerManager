@@ -8,6 +8,7 @@ export async function middleware(request: NextRequest) {
   if (
     !authenticated &&
     (request.nextUrl.pathname.startsWith('/banner') ||
+      request.nextUrl.pathname.startsWith('/business') ||
       request.nextUrl.pathname.startsWith('/user/update'))
   ) {
     return NextResponse.redirect(new URL('/user/login', request.url))
