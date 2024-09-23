@@ -1,6 +1,7 @@
 'use server'
 
 import ApiRoute from '@/data/apiRoute'
+import { ApiErrorResponse } from '@/data/type/apiErrorResponse'
 import { revalidateTag } from 'next/cache'
 import { cookies } from 'next/headers'
 
@@ -16,20 +17,24 @@ export async function UpdateUser(reqBody: object) {
       body: JSON.stringify(reqBody),
     })
 
-    const data = await response.json()
-
     revalidateTag('user')
-    if (
-      data &&
-      data.data &&
-      data.data.message === 'The email has already been taken.'
-    )
-      return 'E-mail já usado!'
-    if (data && data.data && data.data.message === 'incorrect password')
-      return 'Senha incorreta.'
 
-    return data.data.message
+    const data: ApiErrorResponse = await response.json()
+
+    if (data.errors) {
+      const errors = data.errors
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for (const [field, messages] of Object.entries(errors)) {
+        messages.forEach((message) => {
+          if (message === 'The email has already been taken.')
+            return 'E-mail já cadastrado!'
+        })
+      }
+    }
+    if (data.data.message === 'incorrect password') return 'Senha incorreta.'
+    return 'success'
   } catch (error) {
-    return 'Houver error'
+    return 'Desculpe, ocorreu um erro ao alterar.\n Por favor, tente novamente mais tarde.'
   }
 }
