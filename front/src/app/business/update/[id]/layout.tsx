@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Banner app',
-  description: 'Show project',
+  title: {
+    template: '%s',
+    default: 'Update Business',
+  },
 }
-
-export default function UserLayout({
+export default function BusinessLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
