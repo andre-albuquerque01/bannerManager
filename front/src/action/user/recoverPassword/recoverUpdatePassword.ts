@@ -1,7 +1,8 @@
 'use server'
 
 import ApiRoute from '@/data/apiRoute'
-import VerificationPassword from '@/data/function/validatePassword'
+import VerificationPasswordReturn from '@/data/function/validatePasswordReturn'
+import { ApiErrorResponse } from '@/data/type/apiErrorResponse'
 
 interface UpdatePasswordRequestInterface {
   token: string
@@ -24,7 +25,11 @@ export async function RecoverUpdatePassword(
     if (requestBody.password !== requestBody.password_confirmation) {
       return 'Senhas incompatíveis!'
     }
-    VerificationPassword(requestBody.password)
+
+    const verificationPassword = VerificationPasswordReturn(
+      requestBody.password,
+    )
+    if (verificationPassword) return verificationPassword
 
     const response = await ApiRoute(`/resetPassword`, {
       method: 'PUT',
@@ -35,36 +40,49 @@ export async function RecoverUpdatePassword(
       body: JSON.stringify(requestBody),
     })
 
-    const data = await response.json()
+    const data: ApiErrorResponse = await response.json()
 
-    let text = ''
-    switch (data) {
-      case data.data.message ===
-        'The password field must be at least 8 characters.':
-        text = 'A senha deve ter ao menos 8 caracteres'
-        break
-      case data.data.message ===
-        'The password field must contain at least one symbol.':
-        text = 'A senha precisa de um caractere especial'
-        break
-      case data.data.message ===
-        'The password field must contain at least one uppercase and one lowercase letter.':
-        text = 'A senha precisa de ao menos uma letra maiúscula e uma minúscula'
-        break
-      case data.data.message ===
-        'The given password has appeared in a data leak. Please choose a different password.':
-        text = 'Senha fraca.'
-        break
-      default:
-        return ''
+    if (data.errors) {
+      const errors = data.errors
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for (const [field, messages] of Object.entries(errors)) {
+        messages.forEach((message) => {
+          if (message === 'The password field is required.') {
+            return 'O campo senha é obrigatório.'
+          } else if (
+            message === 'The password confirmation field is required.'
+          ) {
+            return 'O campo repita senha é obrigatório.'
+          } else if (
+            message === 'The password field must be at least 8 characters.'
+          ) {
+            return 'A senha deve ter ao menos 8 caracteres.'
+          } else if (
+            message === 'The password field must contain at least one symbol.'
+          ) {
+            return 'A senha precisa de um caracter especial.'
+          } else if (
+            message ===
+            'The password field must contain at least one uppercase and one lowercase letter.'
+          ) {
+            return 'Senha precisa de ao menos uma letra maiúscula e uma minúsculas.'
+          } else if (
+            message ===
+            'The given password has appeared in a data leak. Please choose a different password.'
+          ) {
+            return 'Senha fraca.'
+          }
+        })
+      }
     }
 
     if (!response.ok) {
-      return 'Erro ao fazer alteração!'
+      return 'Desculpe, ocorreu um erro ao alterar.\n Por favor, tente novamente mais tarde.'
     }
 
-    return text
+    return ''
   } catch (error) {
-    return 'Erro ao fazer alteração!'
+    return 'Desculpe, ocorreu um erro ao alterar.\n Por favor, tente novamente mais tarde.'
   }
 }

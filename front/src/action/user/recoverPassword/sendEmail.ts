@@ -1,7 +1,6 @@
 'use server'
 
 import ApiRoute from '@/data/apiRoute'
-import apiError from '@/data/function/apiErro'
 
 export async function SendEmail(
   state: { ok: boolean; error: string; data: null },
@@ -23,15 +22,20 @@ export async function SendEmail(
 
     const data = await response.json()
 
-    const message =
-      typeof data.message === 'string'
-        ? data.message
-        : JSON.stringify(data.message)
-
-    if (message && message.includes('Failed to send email'))
+    if (data.data.message === 'user not found')
       throw new Error('E-mail não cadastrado!')
+
     return { data: null, error: '', ok: true }
   } catch (error) {
-    return apiError(error)
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Desculpe, ocorreu um erro ao enviar o e-mail.\n Por favor, tente novamente mais tarde.'
+
+    return {
+      data: null,
+      error: errorMessage,
+      ok: false,
+    }
   }
 }
