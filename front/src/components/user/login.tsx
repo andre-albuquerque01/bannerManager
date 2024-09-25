@@ -50,7 +50,6 @@ export const LoginComponent = () => {
           required={false}
         />
         {state.error &&
-          state.error !== 'E-mail não verificado' &&
           state.error !== 'Unexpected end of JSON input' &&
           state.error !==
             "Cannot read properties of undefined (reading 'message')" && (
