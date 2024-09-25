@@ -1,33 +1,32 @@
 'use client'
 import Link from 'next/link'
-import { useFormState, useFormStatus } from 'react-dom'
-import { useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import { UpdateBanner } from '@/action/banner/update'
 import { BannerInterface } from '@/data/type/banner'
 import { InputUpdateComponent } from '../form/inputUpdate'
 import { useRouter } from 'next/navigation'
+import { ExtractDriveId } from '@/data/function/extractDriveId'
 
-function FormButton() {
-  const { pending } = useFormStatus()
-
+const BtnForm = ({ pending }: { pending: boolean }) => {
   return (
     <>
       {pending ? (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
-          disabled={pending}
-        >
-          Alterando...
-        </button>
+        <div className="flex justify-center">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
+            disabled={pending}
+          >
+            Alterando...
+          </button>
+        </div>
       ) : (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
-          disabled={pending}
-        >
-          Alterar
-        </button>
+        <div className="flex justify-center">
+          <button className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg">
+            Alterar
+          </button>
+        </div>
       )}
     </>
   )
@@ -35,40 +34,40 @@ function FormButton() {
 
 export const UpdateBannerComponent = ({
   data,
+  id,
 }: {
   data: BannerInterface | undefined
+  id: string
 }) => {
-  const [state, action] = useFormState(UpdateBanner, {
-    ok: false,
-    error: '',
-    data: null,
-  })
   const router = useRouter()
-  const [media, setMedia] = useState<{ type: string; url: string } | null>(null)
+  const [media, setMedia] = useState<string>(data?.urlMidia || '')
+  const [extension, setExtension] = useState<string>(data?.extensionMidia || '')
+  const [status, setStatus] = useState<boolean>(false)
+  const [returnError, setReturnError] = useState<string>('')
+  const idImage = ExtractDriveId(media)
 
-  function handleMediaChange({ target }: React.ChangeEvent<HTMLInputElement>) {
-    if (target.files && target.files.length > 0) {
-      const file = target.files[0]
-      const url = URL.createObjectURL(file)
-      const type = file.type.startsWith('video') ? 'video' : 'image'
-      setMedia({ type, url })
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setStatus(true)
+    setReturnError('')
+    const formData = new FormData(e.currentTarget)
+    const req = await UpdateBanner(formData, id)
+    if (req === '') {
+      alert('Alterado com sucesso.')
+      router.back()
     }
+    setReturnError(req)
+    setStatus(false)
   }
 
-  useEffect(() => {
-    if (state.ok) {
-      alert('Alterado com sucesso!')
-      router.push('/')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state])
-
   return (
-    <form className="space-y-5 flex flex-col text-black my-5" action={action}>
+    <form
+      className="space-y-5 flex flex-col text-black my-5"
+      onSubmit={handleSubmit}
+    >
       <Link href="/" className="flex items-center">
         <ArrowLeft className="w-5 h-5" /> Voltar
       </Link>
-      <input type="hidden" name="idBanner" defaultValue={data?.idBanner} />
       <InputUpdateComponent
         type="text"
         label="Veículo"
@@ -95,10 +94,10 @@ export const UpdateBannerComponent = ({
       />
       <InputUpdateComponent
         type="text"
-        label="Looping"
-        name="looping"
-        id="looping"
-        value={data?.looping ?? ''}
+        label="Tamanho da mídia"
+        name="tamanho"
+        id="tamanho"
+        value={data?.tamanho ?? ''}
         required={false}
       />
       <InputUpdateComponent
@@ -117,58 +116,113 @@ export const UpdateBannerComponent = ({
         value={data?.statusBanner ?? ''}
         required={false}
       />
+      <InputUpdateComponent
+        type="text"
+        label="Título"
+        name="title"
+        id="title"
+        value={data?.title ?? ''}
+        required={true}
+      />
       <div className="flex flex-col text-black">
-        <label htmlFor="nameMidia">
-          Mídia <span className="text-xs text-red-600"> *</span>
+        <label htmlFor="extensionMidia">
+          Extensão da mídia
+          <span className="text-xs text-red-600"> *</span>
+        </label>
+        <select
+          name="extensionMidia"
+          id="extensionMidia"
+          className="bg-transparent border border-zinc-400 p-1.5 outline-none text-black rounded-lg w-96 max-sm:w-80"
+          onChange={(e) => setExtension(e.target.value)}
+          value={data?.extensionMidia}
+          required
+        >
+          <option>Selecione uma extensão</option>
+          <option value="JPG">JPG</option>
+          <option value="PNG">PNG</option>
+          <option value="GIF">GIF</option>
+          <option value="MP4">MP4</option>
+          <option value="WEBM">WEBM</option>
+        </select>
+      </div>
+      <div className="flex flex-col text-black">
+        <label htmlFor="urlMidia">
+          Url da mídia
+          <span className="text-xs text-red-600"> *</span>
         </label>
         <input
-          type="file"
-          name="nameMidia"
-          id="nameMidia"
-          onChange={handleMediaChange}
+          type="text"
+          name="urlMidia"
+          id="urlMidia"
+          defaultValue={data?.urlMidia}
           className="bg-transparent border border-zinc-400 p-1.5 outline-none text-black rounded-lg w-96 max-sm:w-80"
+          onChange={(e) => setMedia(e.target.value)}
+          value={media}
+          required
         />
       </div>
-      {media && (
-        <>
-          {media.type === 'image' ? (
-            <Image src={media.url} alt="Imagem" width={300} height={300} />
+      {returnError && <p className="text-xs text-red-600">{returnError}</p>}
+      <BtnForm pending={status} />
+
+      <div className="flex flex-col text-black">
+        {media !== data?.urlMidia ? (
+          idImage ? (
+            <iframe
+              key={`iframe-${media}`}
+              src={`https://drive.google.com/file/d/${idImage}/preview`}
+              width="320"
+              height="160"
+              allow="autoplay"
+            ></iframe>
+          ) : ['JPG', 'PNG', 'GIF'].includes(extension.toUpperCase()) ? (
+            <Image
+              key={`image-${media}`}
+              src={media}
+              alt="Nova mídia"
+              width={300}
+              height={300}
+            />
           ) : (
-            <video width="300" height="300" controls>
-              <source src={media.url} type="video/webm" />
-              <source src={media.url} type="video/mp4" />
+            <video key={`video-${media}`} width="300" height="300" controls>
+              <source src={media} type={`video/${extension.toLowerCase()}`} />
               Seu navegador não suporta a exibição de vídeos.
             </video>
-          )}
-        </>
-      )}
-      <div className="flex flex-col text-black">
-        <label htmlFor="nameMidia">
-          Mídia atual: <span className="text-xs text-red-600"> </span>
-        </label>
-        {data?.complexidade === 'MP4' ? (
-          <video width="300" height="300" controls>
-            <source
-              src={`${process.env.NEXT_PUBLIC_ROUTE_STORAGE_FILES}/${data?.nameMidia}`}
-              type="video/webm"
-            />
-            <source
-              src={`${process.env.NEXT_PUBLIC_ROUTE_STORAGE_FILES}/${data?.nameMidia}`}
-              type="video/mp4"
-            />
-            Seu navegador não suporta a exibição de vídeos.
-          </video>
+          )
         ) : (
-          <Image
-            src={`${process.env.NEXT_PUBLIC_ROUTE_STORAGE_FILES}/${data?.nameMidia}`}
-            alt="Imagem"
-            width={300}
-            height={300}
-          />
+          <>
+            {idImage ? (
+              <iframe
+                key={`iframe-${data?.urlMidia}`}
+                src={`https://drive.google.com/file/d/${idImage}/preview`}
+                width="320"
+                height="160"
+                allow="autoplay"
+              ></iframe>
+            ) : ['JPG', 'PNG', 'GIF'].includes(extension.toUpperCase()) ? (
+              <Image
+                key={`image-${data?.urlMidia}`}
+                src={data?.urlMidia || ''}
+                alt="Mídia atual"
+                width={300}
+                height={300}
+              />
+            ) : (
+              <video
+                key={`video-${data?.urlMidia}`}
+                width="300"
+                height="300"
+                controls
+              >
+                <source
+                  src={data?.urlMidia || ''}
+                  type={`video/${extension.toLowerCase()}`}
+                />
+                Seu navegador não suporta a exibição de vídeos.
+              </video>
+            )}
+          </>
         )}
       </div>
-      {state.error && <p className="text-xs text-red-600">{state.error}</p>}
-      <FormButton />
     </form>
   )
 }
