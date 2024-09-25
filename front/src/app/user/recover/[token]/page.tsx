@@ -1,5 +1,13 @@
 import { UpdatePasswordRecoverComponent } from '@/components/user/recover/updatePasswordRecover'
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s',
+    default: 'Recuperação de senha',
+  },
+}
 
 export default function SendEmail({ params }: { params: { token: string } }) {
   if (!params) redirect('/')
