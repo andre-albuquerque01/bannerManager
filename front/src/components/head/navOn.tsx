@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { LogoutComponent } from '../user/logout'
+import Image from 'next/image'
 
 export const HeaderOn = () => {
   const [navbar, setNavBar] = useState<boolean>(false)
@@ -21,10 +22,10 @@ export const HeaderOn = () => {
   })
 
   return (
-    <header className="bg-zinc-800">
+    <header className="bg-zinc-900">
       <div className="max-w-[1200px] mx-auto max-md:px-5 flex justify-between items-center h-20 text-white ">
         <Link href="/" className="">
-          <h1 className=" capitalize text-2xl">Banner</h1>
+          <Image src={'/logo.png'} width={250} height={25} alt="Logo" />
         </Link>
 
         <nav className="uppercase">
@@ -50,6 +51,12 @@ export const HeaderOn = () => {
               className="transform duration-500 rounded-md hover:bg-zinc-600 p-2"
             >
               <span onClick={() => setNavBar(false)}>Perfil</span>
+            </Link>
+            <Link
+              href="/business"
+              className="transform duration-500 rounded-md hover:bg-zinc-600 p-2"
+            >
+              <span onClick={() => setNavBar(false)}>Campanha</span>
             </Link>
             <LogoutComponent />
           </div>

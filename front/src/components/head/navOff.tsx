@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -20,10 +21,10 @@ export const HeaderOff = () => {
   })
 
   return (
-    <header className="bg-zinc-800 ">
+    <header className="bg-zinc-900 ">
       <div className="max-w-[1200px] mx-auto max-md:px-5 flex justify-between items-center h-20 text-white ">
         <Link href="/" className="">
-          <h1 className=" capitalize text-2xl">Banner</h1>
+          <Image src={'/logo.png'} width={250} height={25} alt="Logo" />
         </Link>
 
         <nav className="uppercase">
