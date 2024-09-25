@@ -1,6 +1,5 @@
 'use client'
 import Link from 'next/link'
-import { useFormStatus } from 'react-dom'
 import { ArrowLeft } from 'lucide-react'
 import { InputComponent } from '../form/input'
 import { InputUpdateComponent } from '../form/inputUpdate'
@@ -9,25 +8,24 @@ import { FormEvent, useState } from 'react'
 import { UpdateUser } from '@/action/user/update'
 import { useRouter } from 'next/navigation'
 
-function FormButton() {
-  const { pending } = useFormStatus()
-
+const BtnForm = ({ pending }: { pending: boolean }) => {
   return (
     <>
       {pending ? (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
-          disabled={pending}
-        >
-          Alterando...
-        </button>
+        <div className="flex justify-center">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
+            disabled={pending}
+          >
+            Alterando...
+          </button>
+        </div>
       ) : (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
-          disabled={pending}
-        >
-          Alterar
-        </button>
+        <div className="flex justify-center">
+          <button className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg">
+            Alterar
+          </button>
+        </div>
       )}
     </>
   )
@@ -38,20 +36,24 @@ export const UpdateUserComponent = ({
 }: {
   data: UserInterface | undefined
 }) => {
-  const [error, setError] = useState()
+  const [error, setError] = useState('')
+  const [status, setStatus] = useState<boolean>(false)
   const router = useRouter()
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setStatus(true)
 
     const formData = new FormData(e.currentTarget)
     const data = Object.fromEntries(formData)
     const req = await UpdateUser(data)
 
     if (req === 'success') {
+      setStatus(false)
       alert('Alterado com sucesso!')
       router.back()
     }
+    setStatus(false)
     setError(req)
   }
 
@@ -88,7 +90,7 @@ export const UpdateUserComponent = ({
         required={true}
       />
       {error && <p className="text-xs text-red-600">{error}</p>}
-      <FormButton />
+      <BtnForm pending={status} />
     </form>
   )
 }

@@ -6,27 +6,25 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
-import { useFormStatus } from 'react-dom'
 
-function FormButton() {
-  const { pending } = useFormStatus()
-
+const BtnForm = ({ pending }: { pending: boolean }) => {
   return (
     <>
       {pending ? (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
-          disabled={pending}
-        >
-          Alterando...
-        </button>
+        <div className="flex justify-center">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
+            disabled={pending}
+          >
+            Alterando...
+          </button>
+        </div>
       ) : (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg"
-          disabled={pending}
-        >
-          Alterar
-        </button>
+        <div className="flex justify-center">
+          <button className="bg-blue-600 text-white px-4 py-2 w-96 max-md:w-80 max-md:mx-auto rounded-lg">
+            Alterar
+          </button>
+        </div>
       )}
     </>
   )
@@ -39,9 +37,11 @@ export const UpdatePasswordRecoverComponent = ({
 }) => {
   const router = useRouter()
   const [error, setError] = useState<string>('')
+  const [status, setStatus] = useState<boolean>(false)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setStatus(true)
 
     const formData = new FormData(e.currentTarget)
     const data = {
@@ -52,9 +52,11 @@ export const UpdatePasswordRecoverComponent = ({
     }
     const response = await RecoverUpdatePassword(data)
     if (response === '') {
+      setStatus(false)
       alert('Alterado com sucesso!')
       router.push('/user/login')
     } else setError(response)
+    setStatus(false)
   }
 
   return (
@@ -88,7 +90,7 @@ export const UpdatePasswordRecoverComponent = ({
         required={true}
       />
       <p className="text-xs text-red-600">{error && error}</p>
-      <FormButton />
+      <BtnForm pending={status} />
     </form>
   )
 }
